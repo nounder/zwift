@@ -4,7 +4,7 @@
 //! Swift owns the SwiftUI view layer (@Observable store, Views, rendering).
 //! The bridge is C-callable functions in both directions.
 //!
-//! See src/swiftui_bridge.swift for the SwiftUI side.
+//! See examples/todoz_swiftui/bridge.swift for the SwiftUI side.
 
 const std = @import("std");
 
@@ -63,7 +63,7 @@ fn nsString(comptime s: [*:0]const u8) id {
 const NSRect = extern struct { x: f64, y: f64, w: f64, h: f64 };
 const NSSize = extern struct { width: f64, height: f64 };
 
-// ── Swift bridge (from swiftui_bridge.swift) ────────────────────────
+// ── Swift bridge (from bridge.swift) ────────────────────────────────
 
 extern "c" fn swiftui_store_create() void;
 extern "c" fn swiftui_create_content_view() id;

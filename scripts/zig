@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Use Zig 0.16.0 without changing the user's global Zig installation."""
+"""Use the Zig version pinned in .zig-version without changing the global install."""
 import hashlib
 import os
 import pathlib
@@ -11,7 +11,8 @@ import tarfile
 import tempfile
 import urllib.request
 
-VERSION = "0.16.0"
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+VERSION = (ROOT / ".zig-version").read_text().strip()
 override = os.environ.get("ZIG")
 system = override or shutil.which("zig")
 if system and pathlib.Path(system).resolve() != pathlib.Path(__file__).resolve():
@@ -22,12 +23,17 @@ if system and pathlib.Path(system).resolve() != pathlib.Path(__file__).resolve()
 
 arch = {"arm64": "aarch64", "x86_64": "x86_64"}.get(platform.machine())
 if platform.system() != "Darwin" or not arch:
-    raise SystemExit("This bootstrap supports macOS. Set ZIG to a Zig 0.16.0 executable.")
+    raise SystemExit(f"This bootstrap supports macOS. Set ZIG to a Zig {VERSION} executable.")
 hashes = {
-    "aarch64": "b23d70deaa879b5c2d486ed3316f7eaa53e84acf6fc9cc747de152450d401489",
-    "x86_64": "0387557ed1877bc6a2e1802c8391953baddba76081876301c522f52977b52ba7",
+    "0.16.0": {
+        "aarch64": "b23d70deaa879b5c2d486ed3316f7eaa53e84acf6fc9cc747de152450d401489",
+        "x86_64": "0387557ed1877bc6a2e1802c8391953baddba76081876301c522f52977b52ba7",
+    },
 }
-cache = pathlib.Path(__file__).resolve().parents[1] / ".zig-cache" / "toolchains"
+digest = hashes.get(VERSION, {}).get(arch)
+if digest is None:
+    raise SystemExit(f"No pinned checksum for Zig {VERSION} on {platform.machine()}")
+cache = ROOT / ".zig-cache" / "toolchains"
 name = f"zig-{arch}-macos-{VERSION}"
 binary = cache / name / "zig"
 if not binary.exists():
@@ -39,11 +45,14 @@ if not binary.exists():
         print(f"Downloading pinned Zig {VERSION} from ziglang.org…", file=sys.stderr)
         with urllib.request.urlopen(url, timeout=60) as source, archive.open("wb") as dest:
             shutil.copyfileobj(source, dest)
-        if hashlib.sha256(archive.read_bytes()).hexdigest() != hashes[arch]:
+        if hashlib.sha256(archive.read_bytes()).hexdigest() != digest:
             raise SystemExit("Zig archive checksum mismatch")
         with tarfile.open(archive) as tar:
             # Archive identity was verified against the release's pinned SHA-256.
-            tar.extractall(tmp)
+            try:
+                tar.extractall(tmp, filter="data")
+            except TypeError:
+                tar.extractall(tmp)
         try:
             (tmp / name).rename(cache / name)
         except OSError:

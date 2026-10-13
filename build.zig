@@ -3,7 +3,6 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    if (comptime @import("builtin").os.tag == .macos) @import("lab/build.zig").add(b, optimize);
 
     // ── Shared zwift module ────────────────────────────────────────────
 
@@ -113,8 +112,10 @@ pub fn build(b: *std.Build) void {
     });
     const run_lib_tests = b.addRunArtifact(lib_tests);
 
-    const test_step = b.step("test", "Run unit tests");
+    const test_step = b.step("test", "Typecheck the AppKit app and run lab model, view, and state tests");
     test_step.dependOn(&run_lib_tests.step);
+    // Register the lab after this step exists so its Zig tests attach to it.
+    if (comptime @import("builtin").os.tag == .macos) @import("lab/build.zig").add(b, optimize, test_step);
 }
 
 // ── Example helper ─────────────────────────────────────────────────────

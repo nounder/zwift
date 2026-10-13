@@ -14,6 +14,8 @@ var made: usize = 0;
 var updated: usize = 0;
 var dismantled: usize = 0;
 var released: usize = 0;
+var paths_built: usize = 0;
+var paths_released: usize = 0;
 var test_phase: u8 = 0;
 const toolbar_height = 64;
 const cell_width = 64;
@@ -26,7 +28,12 @@ fn state(view: O) *State {
 fn method(comptime selector: [:0]const u8, implementation: anytype, comptime encoding: [:0]const u8) void {
     std.debug.assert(objc.addMethod(view_class, objc.sel(selector), @ptrCast(&implementation), encoding));
 }
+fn releasePath(path: ?*anyopaque) void {
+    paths_released += 1;
+    cg.CGPathRelease(@ptrCast(path.?));
+}
 pub fn install() void {
+    M.releaseRendered = releasePath;
     view_class = objc.allocateClassPair(objc.class("NSView"), "ZwiftPaintSurface") orelse @panic("NSView class registration failed");
     std.debug.assert(objc.addIvar(view_class, "zigState", @sizeOf(usize), 3, "^v"));
     method("drawRect:", drawRect, "v@:{CGRect={CGPoint=dd}{CGSize=dd}}");
@@ -128,13 +135,22 @@ fn keyDown(view: O, _: objc.Sel, event: O) callconv(.c) void {
     }
     invalidate(view);
 }
-fn drawStroke(context: cg.Context, stroke: *const M.Stroke) void {
-    const c = colors[@intFromEnum(stroke.color)];
-    cg.CGContextSetRGBStrokeColor(context, c[0], c[1], c[2], 1);
-    cg.CGContextSetRGBFillColor(context, c[0], c[1], c[2], 1);
-    cg.CGContextSetLineWidth(context, stroke.width);
-    cg.CGContextSetLineCap(context, 1);
-    cg.CGContextSetLineJoin(context, 1);
+fn ensurePath(stroke: *M.Stroke) ?cg.Path {
+    if (stroke.rendered) |existing| return @ptrCast(existing);
+    const path = cg.CGPathCreateMutable() orelse return null;
+    const points = stroke.points.items;
+    const first = points[0];
+    if (points.len == 1) {
+        cg.CGPathAddEllipseInRect(path, null, cg.rect(first.x - stroke.width / 2, first.y - stroke.width / 2, stroke.width, stroke.width));
+    } else {
+        cg.CGPathMoveToPoint(path, null, first.x, first.y);
+        for (points[1..]) |p| cg.CGPathAddLineToPoint(path, null, p.x, p.y);
+    }
+    stroke.rendered = path;
+    paths_built += 1;
+    return path;
+}
+fn drawImmediate(context: cg.Context, stroke: *const M.Stroke) void {
     const points = stroke.points.items;
     const first = points[0];
     if (points.len == 1) {
@@ -146,14 +162,32 @@ fn drawStroke(context: cg.Context, stroke: *const M.Stroke) void {
         cg.CGContextStrokePath(context);
     }
 }
-fn drawModel(context: cg.Context, model: *const M.Model, bounds: cg.Rect) void {
+fn drawStroke(context: cg.Context, stroke: *M.Stroke, cache: bool) void {
+    const c = colors[@intFromEnum(stroke.color)];
+    cg.CGContextSetRGBStrokeColor(context, c[0], c[1], c[2], 1);
+    cg.CGContextSetRGBFillColor(context, c[0], c[1], c[2], 1);
+    cg.CGContextSetLineWidth(context, stroke.width);
+    cg.CGContextSetLineCap(context, 1);
+    cg.CGContextSetLineJoin(context, 1);
+    if (cache) {
+        if (ensurePath(stroke)) |path| {
+            // AddPath copies into the context path. The retained CGPath stays owned by the stroke.
+            cg.CGContextBeginPath(context);
+            cg.CGContextAddPath(context, path);
+            if (stroke.points.items.len == 1) cg.CGContextFillPath(context) else cg.CGContextStrokePath(context);
+            return;
+        }
+    }
+    drawImmediate(context, stroke);
+}
+fn drawModel(context: cg.Context, model: *M.Model, bounds: cg.Rect) void {
     cg.CGContextSaveGState(context);
     defer cg.CGContextRestoreGState(context);
     cg.CGContextSetRGBFillColor(context, 1, 1, 1, 1);
     cg.CGContextFillRect(context, bounds);
     cg.CGContextClipToRect(context, cg.rect(0, toolbar_height, bounds.size.width, @max(0, bounds.size.height - toolbar_height)));
-    for (model.strokes.items[0..model.visible]) |*stroke| drawStroke(context, stroke);
-    if (model.active) |*stroke| drawStroke(context, stroke);
+    for (model.strokes.items[0..model.visible]) |*stroke| drawStroke(context, stroke, true);
+    if (model.active) |*stroke| drawStroke(context, stroke, false);
 }
 fn drawRect(view: O, _: objc.Sel, _: cg.Rect) callconv(.c) void {
     const s = state(view);
@@ -202,7 +236,7 @@ fn sendUndoKey(view: O, redo: bool) void {
     const e = objc.send(objc.class("NSEvent"), "keyEventWithType:location:modifierFlags:timestamp:windowNumber:context:characters:charactersIgnoringModifiers:isARepeat:keyCode:", O, .{ @as(u64, 10), cg.Point{ .x = 0, .y = 0 }, flags, @as(f64, 0), objc.send(window, "windowNumber", i64, .{}), @as(?O, null), objc.nsString("z"), objc.nsString("z"), false, @as(u16, 6) });
     objc.send(window, "sendEvent:", void, .{e});
 }
-fn pixel(model: *const M.Model, x: usize, y: usize) [4]u8 {
+fn pixel(model: *M.Model, x: usize, y: usize) [4]u8 {
     const bytes = allocator.alloc(u8, 800 * 600 * 4) catch @panic("test bitmap allocation failed");
     defer allocator.free(bytes);
     const space = cg.CGColorSpaceCreateDeviceRGB();
@@ -266,6 +300,9 @@ pub fn poll() bool {
     click(view, 9);
     const white = pixel(&s.model, 180, 150);
     probe.require(s.model.visible == 0 and white[0] == 255 and white[1] == 255 and white[2] == 255, "Paint clear pixels");
+    // The script finishes exactly three strokes: red, blue dot, eraser.
+    if (!(paths_built == 3 and paths_released == 3)) std.debug.print("paint path cache built={d} released={d}\n", .{ paths_built, paths_released });
+    probe.require(paths_built == 3 and paths_released == 3, "finished paint strokes should be cached once and released on clear");
     // Detach the real SwiftUI hosting tree, exercising dismantle and release.
     _ = objc.send(window, "retain", O, .{});
     defer objc.send(window, "release", void, .{});

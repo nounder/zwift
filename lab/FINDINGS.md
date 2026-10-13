@@ -187,7 +187,10 @@ SwiftUI's make/update/dismantle/dealloc sequence. Closing the SwiftUI-created
 window and detaching its content releases the model. Merely detaching content
 was insufficient because the window's SwiftUI owner retained the hosting tree.
 AppKit's `acceptsFirstMouse` is needed to deliver the first click to the canvas
-when the test application's window is inactive.
+when the test application's window is inactive. Finished strokes keep one
+CGPath each. Later redraws stroke that path instead of walking every point.
+The stroke under the pointer is still rebuilt until mouse-up. Undo and redo
+move the visibility cursor and do not copy points or paths.
 
 Observed runs have one App body evaluation and one initial root callback for
 each app. Animation frames and Paint strokes do not reconstruct the outer
@@ -201,9 +204,10 @@ Remaining costs and small next improvements:
   capture per Canvas construction. The capture matches Swift's normal escaping
   closure ownership. Reusing bounded temporary storage would remove the extra
   allocation; no frame-time performance advantage is claimed here.
-- Paint replays all visible points on each redraw, so rendering cost grows with
-  drawing size. Caching finished strokes as CGPaths or a backing bitmap is the
-  next focused optimization. Undo/redo itself does not copy point arrays.
+- Finished strokes are retained CGPaths, so a redraw no longer walks their
+  points. Cost still grows with the number of strokes, because each path is
+  replayed. A backing bitmap is the next step for long drawings. Undo/redo
+  does not copy point arrays or paths.
 - Move the animation callback's time input to the timeline context when cadence
   and timeline-controlled pause semantics are needed. Add that getter as another
   independently checked specialization.

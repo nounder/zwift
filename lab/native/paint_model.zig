@@ -1,9 +1,26 @@
 //! One Zig-owned model per NSView instance. Completed strokes are immutable;
-//! undo/redo moves a cursor without copying their point buffers.
+//! undo/redo moves a cursor without copying their point buffers. The renderer
+//! may attach one retained CGPath; destroying a stroke releases it.
 const std = @import("std");
 pub const Point = @import("cg.zig").Point;
 pub const Color = enum { black, red, blue, green, eraser };
-pub const Stroke = struct { points: std.ArrayList(Point) = .empty, color: Color, width: f64 };
+pub const Stroke = struct {
+    points: std.ArrayList(Point) = .empty,
+    color: Color,
+    width: f64,
+    /// Retained CGPath for a finished stroke. Null until the renderer caches one.
+    rendered: ?*anyopaque = null,
+};
+/// Set by the AppKit renderer. The model never calls CoreGraphics itself.
+pub var releaseRendered: ?*const fn (?*anyopaque) void = null;
+fn destroy(stroke: *Stroke, allocator: std.mem.Allocator) void {
+    stroke.points.deinit(allocator);
+    if (stroke.rendered) |path| {
+        const release = releaseRendered orelse @panic("rendered stroke dropped without a release hook");
+        release(path);
+        stroke.rendered = null;
+    }
+}
 pub const Model = struct {
     allocator: std.mem.Allocator,
     strokes: std.ArrayList(Stroke) = .empty,
@@ -36,14 +53,14 @@ pub const Model = struct {
         // Reserve before dropping redo history, so allocation failure keeps both
         // the active stroke and all previous history intact.
         try self.strokes.ensureTotalCapacity(self.allocator, self.visible + 1);
-        for (self.strokes.items[self.visible..]) |*redo_stroke| redo_stroke.points.deinit(self.allocator);
+        for (self.strokes.items[self.visible..]) |*redo_stroke| destroy(redo_stroke, self.allocator);
         self.strokes.shrinkRetainingCapacity(self.visible);
         self.strokes.appendAssumeCapacity(stroke);
         self.visible += 1;
         self.active = null;
     }
     pub fn cancel(self: *Model) void {
-        if (self.active) |*stroke| stroke.points.deinit(self.allocator);
+        if (self.active) |*stroke| destroy(stroke, self.allocator);
         self.active = null;
     }
     pub fn undo(self: *Model) void {
@@ -56,7 +73,7 @@ pub const Model = struct {
     }
     pub fn clear(self: *Model) void {
         self.cancel();
-        for (self.strokes.items) |*stroke| stroke.points.deinit(self.allocator);
+        for (self.strokes.items) |*stroke| destroy(stroke, self.allocator);
         self.strokes.clearRetainingCapacity();
         self.visible = 0;
     }
@@ -127,4 +144,29 @@ fn allocationScenario(allocator: std.mem.Allocator) !void {
 }
 test "all stroke allocation failures clean up without leaking" {
     try std.testing.checkAllAllocationFailures(std.testing.allocator, allocationScenario, .{});
+}
+test "dropping redo history releases a rendered stroke once and undo does not" {
+    const Hold = struct {
+        var hits: usize = 0;
+        fn release(_: ?*anyopaque) void {
+            hits += 1;
+        }
+    };
+    Hold.hits = 0;
+    const previous = releaseRendered;
+    defer releaseRendered = previous;
+    releaseRendered = Hold.release;
+    var m: Model = .{ .allocator = std.testing.allocator };
+    defer m.deinit();
+    try m.begin(.{ .x = 1, .y = 2 });
+    try m.move(.{ .x = 3, .y = 4 });
+    try m.finish();
+    m.undo();
+    m.strokes.items[0].rendered = @ptrFromInt(1);
+    try std.testing.expectEqual(@as(usize, 0), Hold.hits);
+    try m.begin(.{ .x = 8, .y = 9 });
+    try m.finish();
+    try std.testing.expectEqual(@as(usize, 1), Hold.hits);
+    try std.testing.expectEqual(@as(usize, 1), m.strokes.items.len);
+    try std.testing.expect(m.strokes.items[0].rendered == null);
 }

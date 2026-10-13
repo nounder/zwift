@@ -132,6 +132,8 @@ App bundles are output to `zig-out/`.
 zig build test
 ```
 
+This typechecks the AppKit app and runs the lab's Zig tests: todo, editor, and browser state, typed view validation, and the animation and paint models. SwiftUI launch tests stay on `lab-test` and `lab-native-examples-test`.
+
 ## Regenerating bindings
 
 The AppKit/Foundation Zig bindings are pre-generated and checked in. To regenerate them (e.g. for a new SDK version):

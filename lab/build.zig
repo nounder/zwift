@@ -1,6 +1,6 @@
 const std = @import("std");
 const platform = @import("platform.zig");
-pub fn add(b: *std.Build, optimize: std.builtin.OptimizeMode) void {
+pub fn add(b: *std.Build, optimize: std.builtin.OptimizeMode, unit: *std.Build.Step) void {
     const target = b.resolveTargetQuery(.{ .cpu_arch = .aarch64, .os_tag = .macos, .os_version_min = .{ .semver = platform.minimum_macos } });
     const sdk = std.mem.trim(u8, b.run(&.{ "xcrun", "--show-sdk-path" }), &std.ascii.whitespace);
     const native_all = b.step("lab-native-examples", "Build Native, Animations and Paint without swiftc");
@@ -46,7 +46,8 @@ pub fn add(b: *std.Build, optimize: std.builtin.OptimizeMode) void {
         native_test_all.dependOn(&native_smoke.step);
     }
     const model_tests = b.addTest(.{ .root_module = b.createModule(.{ .root_source_file = b.path("lab/native/tests.zig"), .target = target, .optimize = optimize }) });
-    native_test_all.dependOn(&b.addRunArtifact(model_tests).step);
+    const run_model_tests = b.addRunArtifact(model_tests);
+    native_test_all.dependOn(&run_model_tests.step);
     const native_oracle = b.addSystemCommand(&.{"python3"});
     native_oracle.addFileArg(b.path("lab/native/check_oracle.py"));
     native_oracle.addArg(platform.swift_target);
@@ -117,7 +118,8 @@ pub fn add(b: *std.Build, optimize: std.builtin.OptimizeMode) void {
     const test_step = b.step("lab-test", "Run Zig state tests, Swift ABI/Observation tests and WebKit smoke tests");
     test_step.dependOn(&run_tests.step);
     const view_tests = b.addTest(.{ .root_module = b.createModule(.{ .root_source_file = b.path("lab/views/tests.zig"), .target = target, .optimize = optimize }) });
-    test_step.dependOn(&b.addRunArtifact(view_tests).step);
+    const run_view_tests = b.addRunArtifact(view_tests);
+    test_step.dependOn(&run_view_tests.step);
     test_step.dependOn(&run_smoke.step);
     all.dependOn(&oracle.step);
     test_step.dependOn(&oracle.step);
@@ -143,6 +145,9 @@ pub fn add(b: *std.Build, optimize: std.builtin.OptimizeMode) void {
     launch.addArg(b.getInstallPath(.prefix, ""));
     launch.step.dependOn(all);
     b.step("lab-launch-test", "Launch and capture each real Swift App entry point").dependOn(&launch.step);
+    unit.dependOn(&run_tests.step);
+    unit.dependOn(&run_view_tests.step);
+    unit.dependOn(&run_model_tests.step);
 }
 fn swiftCompiler(b: *std.Build, lib: *std.Build.Step.Compile, generated: std.Build.LazyPath) *std.Build.Step.Run {
     const cmd = b.addSystemCommand(&.{ "swiftc", "-swift-version", "6", "-warnings-as-errors", "-O", "-g", "-parse-as-library", "-target", platform.swift_target, "-framework", "SwiftUI", "-framework", "WebKit", "-framework", "AppKit", "-import-objc-header" });
