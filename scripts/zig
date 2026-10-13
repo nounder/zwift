@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Use Zig 0.16.0 without changing the user's global Zig installation."""
+import hashlib
+import os
+import pathlib
+import platform
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.request
+
+VERSION = "0.16.0"
+override = os.environ.get("ZIG")
+system = override or shutil.which("zig")
+if system and pathlib.Path(system).resolve() != pathlib.Path(__file__).resolve():
+    if subprocess.check_output([system, "version"], text=True).strip() == VERSION:
+        os.execv(system, [system, *sys.argv[1:]])
+    if override:
+        raise SystemExit(f"ZIG must point to Zig {VERSION}")
+
+arch = {"arm64": "aarch64", "x86_64": "x86_64"}.get(platform.machine())
+if platform.system() != "Darwin" or not arch:
+    raise SystemExit("This bootstrap supports macOS. Set ZIG to a Zig 0.16.0 executable.")
+hashes = {
+    "aarch64": "b23d70deaa879b5c2d486ed3316f7eaa53e84acf6fc9cc747de152450d401489",
+    "x86_64": "0387557ed1877bc6a2e1802c8391953baddba76081876301c522f52977b52ba7",
+}
+cache = pathlib.Path(__file__).resolve().parents[1] / ".zig-cache" / "toolchains"
+name = f"zig-{arch}-macos-{VERSION}"
+binary = cache / name / "zig"
+if not binary.exists():
+    cache.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=cache) as tmp:
+        tmp = pathlib.Path(tmp)
+        archive = tmp / "zig.tar.xz"
+        url = f"https://ziglang.org/download/{VERSION}/{name}.tar.xz"
+        print(f"Downloading pinned Zig {VERSION} from ziglang.org…", file=sys.stderr)
+        with urllib.request.urlopen(url, timeout=60) as source, archive.open("wb") as dest:
+            shutil.copyfileobj(source, dest)
+        if hashlib.sha256(archive.read_bytes()).hexdigest() != hashes[arch]:
+            raise SystemExit("Zig archive checksum mismatch")
+        with tarfile.open(archive) as tar:
+            # Archive identity was verified against the release's pinned SHA-256.
+            tar.extractall(tmp)
+        try:
+            (tmp / name).rename(cache / name)
+        except OSError:
+            if not binary.exists():
+                raise
+os.execv(str(binary), [str(binary), *sys.argv[1:]])

@@ -3,6 +3,7 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    if (comptime @import("builtin").os.tag == .macos) @import("lab/build.zig").add(b, optimize);
 
     // ── Shared zwift module ────────────────────────────────────────────
 
@@ -143,6 +144,7 @@ fn addExample(
     example.root_module.linkSystemLibrary("objc", .{});
 
     const run = b.addRunArtifact(example);
+    b.step("check-" ++ name, "Compile " ++ name ++ " without launching it").dependOn(&example.step);
     const step = b.step("run-" ++ name, "Run " ++ name ++ " example");
     step.dependOn(&run.step);
 }
@@ -152,12 +154,14 @@ fn addExample(
 const SwiftPaths = struct { toolchain_swift_lib: []const u8, sdk_swift_lib: []const u8 };
 
 fn resolveSwiftPaths(b: *std.Build) SwiftPaths {
-    const S = struct { var cached: ?SwiftPaths = null; };
+    const S = struct {
+        var cached: ?SwiftPaths = null;
+    };
     if (S.cached) |paths| return paths;
 
-    const swiftc = std.mem.trim(u8, b.run(&.{ "xcrun", "--find", "swiftc" }), &std.ascii.whitespace);
-    // xcrun --find swiftc → …/Toolchain/usr/bin/swiftc
-    const toolchain_root = std.fs.path.dirname(std.fs.path.dirname(swiftc).?).?;
+    const clang = std.mem.trim(u8, b.run(&.{ "xcrun", "--find", "clang" }), &std.ascii.whitespace);
+    // Resolve runtime libraries without requiring the Swift compiler executable.
+    const toolchain_root = std.fs.path.dirname(std.fs.path.dirname(clang).?).?;
 
     const sdk = std.mem.trim(u8, b.run(&.{ "xcrun", "--show-sdk-path" }), &std.ascii.whitespace);
 
@@ -197,7 +201,7 @@ fn addSwiftUIExample(
         const swiftc_cmd = b.addSystemCommand(&.{ "swiftc", "-parse-as-library", "-emit-object", "-o" });
         const swift_obj = swiftc_cmd.addOutputFileArg(swift_path ++ ".o");
         swiftc_cmd.addFileArg(b.path(swift_path));
-        example.addObjectFile(swift_obj);
+        example.root_module.addObjectFile(swift_obj);
     }
 
     // Swift runtime library paths
@@ -207,12 +211,12 @@ fn addSwiftUIExample(
 
     // Swift core + overlay libraries
     const swift_libs = [_][]const u8{
-        "swiftCore",            "swiftCoreFoundation", "swiftCoreImage",
-        "swiftDispatch",        "swiftIOKit",          "swiftMetal",
-        "swiftOSLog",           "swiftObjectiveC",     "swiftQuartzCore",
-        "swiftSpatial",         "swiftUniformTypeIdentifiers",
-        "swiftXPC",             "swift_Builtin_float",  "swiftos",
-        "swiftsimd",            "swiftObservation",     "swift_Concurrency",
+        "swiftCore",           "swiftCoreFoundation",         "swiftCoreImage",
+        "swiftDispatch",       "swiftIOKit",                  "swiftMetal",
+        "swiftOSLog",          "swiftObjectiveC",             "swiftQuartzCore",
+        "swiftSpatial",        "swiftUniformTypeIdentifiers", "swiftXPC",
+        "swift_Builtin_float", "swiftos",                     "swiftsimd",
+        "swiftObservation",    "swift_Concurrency",
     };
     for (swift_libs) |lib| {
         example.root_module.linkSystemLibrary(lib, .{});
@@ -225,6 +229,7 @@ fn addSwiftUIExample(
     example.root_module.linkSystemLibrary("objc", .{});
 
     const run = b.addRunArtifact(example);
+    b.step("check-" ++ name, "Compile " ++ name ++ " without launching it").dependOn(&example.step);
     const step = b.step("run-" ++ name, "Run " ++ name ++ " example");
     step.dependOn(&run.step);
 }

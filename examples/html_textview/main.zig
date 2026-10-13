@@ -16,7 +16,7 @@ pub fn main() void {
 
     registerClasses();
 
-    const delegate = AppKit.init("HTMLTextViewDelegate");
+    const delegate = objc.init("HTMLTextViewDelegate");
     app.send("setDelegate:", .{delegate});
     app.send("run", .{});
 }

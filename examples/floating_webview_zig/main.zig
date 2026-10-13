@@ -19,7 +19,7 @@ pub fn main() void {
 
     registerClasses();
 
-    const delegate = AppKit.init("FloatingWebViewDelegate");
+    const delegate = objc.init("FloatingWebViewDelegate");
     app.send("setDelegate:", .{delegate});
     app.send("run", .{});
 }

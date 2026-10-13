@@ -22,10 +22,10 @@
     // original project's identity. Thus it is recommended to leave the comment
     // on the following line intact, so that it shows up in code reviews that
     // modify the field.
-    .fingerprint = 0x60f164f8726e579, // Changing this has security and trust implications.
+    .fingerprint = 0xa0611efd8726e579, // Update the name checksum for the existing zwift rename; preserve package identity bits.
     // Tracks the earliest Zig version that the package considers to be a
     // supported use case.
-    .minimum_zig_version = "0.15.2",
+    .minimum_zig_version = "0.16.0",
     // This field is optional.
     // Each dependency must either provide a `url` and `hash`, or a `path`.
     // `zig build --fetch` can be used to fetch all dependencies of a package, recursively.
@@ -73,7 +73,13 @@
     .paths = .{
         "build.zig",
         "build.zig.zon",
+        ".zig-version",
         "src",
+        "swift",
+        "examples",
+        "lab",
+        "scripts",
+        "README.md",
         // For example...
         //"LICENSE",
         //"README.md",

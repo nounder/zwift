@@ -1,0 +1,585 @@
+{
+  "notes": "ReleaseFast Zig / swiftc -O. Includes harness and destruction; warmup 5%, minimum 5 iterations. Sequential cases: small ratios need repeated runs. Swift baselines are noinline. Host timings cover synchronous CPU work, not GPU or input latency. Editor variants alternate to force edits.",
+  "os": "Version 27.0.1 (Build 26A434)",
+  "results": [
+    {
+      "iterations": 100000,
+      "median_ns": 1.64875,
+      "name": "harness.consume",
+      "samples_ns_per_op": [
+        1.71041,
+        1.84542,
+        1.65042,
+        1.62292,
+        1.61166,
+        1.6475,
+        1.64875
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 3.53958,
+      "name": "abi.quad.zig",
+      "samples_ns_per_op": [
+        3.64042,
+        3.44875,
+        3.61084,
+        3.56667,
+        3.37708,
+        3.49041,
+        3.53958
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 2.55459,
+      "name": "abi.quad.swift",
+      "samples_ns_per_op": [
+        2.55459,
+        2.55542,
+        2.55375,
+        2.55458,
+        2.55459,
+        2.58417,
+        2.55417
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 54.17583,
+      "name": "abi.state_uint.zig",
+      "samples_ns_per_op": [
+        53.91541,
+        54.53125,
+        54.5575,
+        54.51292,
+        54.17583,
+        53.80584,
+        53.86708
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 50.78458,
+      "name": "abi.state_uint.swift",
+      "samples_ns_per_op": [
+        51.84292,
+        50.84709,
+        50.7725,
+        50.80417,
+        50.78458,
+        50.7275,
+        50.61417
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 50.60917,
+      "name": "abi.state_bool.zig",
+      "samples_ns_per_op": [
+        50.66709,
+        50.61666,
+        50.59584,
+        50.62916,
+        50.60417,
+        50.60917,
+        50.57708
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 50.59417,
+      "name": "abi.state_bool.swift",
+      "samples_ns_per_op": [
+        50.59417,
+        50.59542,
+        50.59375,
+        50.59292,
+        50.62125,
+        50.59166,
+        50.62084
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 50.42667,
+      "name": "abi.state_double.zig",
+      "samples_ns_per_op": [
+        50.42667,
+        50.45333,
+        50.395,
+        50.47916,
+        50.42625,
+        50.48209,
+        50.42166
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 50.45166,
+      "name": "abi.state_double.swift",
+      "samples_ns_per_op": [
+        50.47916,
+        50.42666,
+        50.48208,
+        50.425,
+        50.45166,
+        50.42084,
+        50.45334
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 72.45167,
+      "name": "abi.state_string.zig",
+      "samples_ns_per_op": [
+        72.40667,
+        72.45167,
+        72.48625,
+        72.48125,
+        72.35875,
+        72.46459,
+        72.42625
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 72.45375,
+      "name": "abi.state_string.swift",
+      "samples_ns_per_op": [
+        72.68916,
+        72.39,
+        72.44875,
+        72.45375,
+        72.36667,
+        72.50625,
+        72.45667
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 62.03292,
+      "name": "abi.environment_bool.zig",
+      "samples_ns_per_op": [
+        62.04584,
+        62.07666,
+        62.035,
+        61.85208,
+        62.03292,
+        60.52125,
+        58.56833
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 13.53292,
+      "name": "abi.environment_bool.swift",
+      "samples_ns_per_op": [
+        13.50834,
+        13.61125,
+        13.53292,
+        13.53334,
+        13.53292,
+        13.53292,
+        13.53333
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 58.60167,
+      "name": "abi.environment_double.zig",
+      "samples_ns_per_op": [
+        58.91625,
+        58.96541,
+        58.69334,
+        58.60167,
+        58.55083,
+        58.56542,
+        58.58375
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 13.51166,
+      "name": "abi.environment_double.swift",
+      "samples_ns_per_op": [
+        13.58625,
+        13.50708,
+        13.50416,
+        13.50708,
+        13.51166,
+        13.52875,
+        13.5425
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 324.94042,
+      "name": "abi.constant_bool.zig",
+      "samples_ns_per_op": [
+        338.6375,
+        330.19917,
+        324.94042,
+        324.27,
+        323.43875,
+        325.11417,
+        324.61041
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 325.05458,
+      "name": "abi.constant_bool.swift",
+      "samples_ns_per_op": [
+        324.78417,
+        325.06917,
+        324.66916,
+        325.05458,
+        325.21291,
+        325.34292,
+        325.05167
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 30.4,
+      "name": "abi.text_string.zig",
+      "samples_ns_per_op": [
+        30.3875,
+        30.38208,
+        30.4,
+        30.41375,
+        30.38542,
+        30.41292,
+        30.42125
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 29.50333,
+      "name": "abi.text_string.swift",
+      "samples_ns_per_op": [
+        29.5,
+        29.45792,
+        29.47709,
+        29.57917,
+        29.50334,
+        29.50333,
+        29.56583
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 937.54042,
+      "name": "view.body.generated",
+      "samples_ns_per_op": [
+        948.56541,
+        935.59041,
+        937.5375,
+        937.67417,
+        935.1975,
+        937.63875,
+        937.54042
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 947.42125,
+      "name": "view.body.handwritten",
+      "samples_ns_per_op": [
+        947.42125,
+        947.35834,
+        947.35375,
+        947.475,
+        947.51125,
+        947.64792,
+        947.26833
+      ]
+    },
+    {
+      "iterations": 500,
+      "median_ns": 308586,
+      "name": "view.host_update.generated",
+      "samples_ns_per_op": [
+        311267,
+        308706.75,
+        309178.666,
+        308125.334,
+        308586,
+        308322.416,
+        307546.334
+      ]
+    },
+    {
+      "iterations": 500,
+      "median_ns": 308173.918,
+      "name": "view.host_update.handwritten",
+      "samples_ns_per_op": [
+        308805.084,
+        308173.918,
+        308068.25,
+        308273.416,
+        307118.832,
+        308823,
+        308024.25
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 20.25,
+      "name": "todo.toggle_core.100",
+      "samples_ns_per_op": [
+        20.375,
+        20.292,
+        20.25,
+        20.125,
+        20.25,
+        20.125,
+        20.042
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 38867.5,
+      "name": "todo.toggle_snapshot_legacy.100",
+      "samples_ns_per_op": [
+        39234.18,
+        38873.32,
+        38809.18,
+        38866.66,
+        38996.68,
+        38836.66,
+        38867.5
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 31377.5,
+      "name": "todo.toggle_snapshot_indexed.100",
+      "samples_ns_per_op": [
+        31341.66,
+        31377.5,
+        31370,
+        31487.5,
+        31400.84,
+        31325.84,
+        31390.82
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 180.583,
+      "name": "todo.toggle_core.1000",
+      "samples_ns_per_op": [
+        180.833,
+        183.292,
+        180.5,
+        180.584,
+        180.459,
+        180.541,
+        180.583
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 849054.18,
+      "name": "todo.toggle_snapshot_legacy.1000",
+      "samples_ns_per_op": [
+        848950.84,
+        849092.5,
+        849220,
+        849054.18,
+        849289.16,
+        848925,
+        846523.34
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 307415,
+      "name": "todo.toggle_snapshot_indexed.1000",
+      "samples_ns_per_op": [
+        307541.68,
+        307190,
+        307230,
+        307415,
+        307464.16,
+        307331.66,
+        307516.66
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 842.166,
+      "name": "todo.toggle_core.5000",
+      "samples_ns_per_op": [
+        842.125,
+        842.125,
+        846.875,
+        842.25,
+        842.125,
+        842.166,
+        842.25
+      ]
+    },
+    {
+      "iterations": 10,
+      "median_ns": 14591350,
+      "name": "todo.toggle_snapshot_legacy.5000",
+      "samples_ns_per_op": [
+        14578466.7,
+        14595741.7,
+        14591350,
+        14590816.7,
+        14593333.4,
+        14599762.5,
+        14555841.6
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 1459757.5,
+      "name": "todo.toggle_snapshot_indexed.5000",
+      "samples_ns_per_op": [
+        1529972.5,
+        1501817.5,
+        1485947.5,
+        1453470.82,
+        1452317.5,
+        1456373.32,
+        1459757.5
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 291691.66,
+      "name": "todo.callback_model.1000",
+      "samples_ns_per_op": [
+        290838.34,
+        291691.66,
+        291713.32,
+        291527.5,
+        291385,
+        293416.66,
+        291766.66
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1279.2,
+      "name": "editor.core_set_stats.1024",
+      "samples_ns_per_op": [
+        1277.05,
+        1281.25,
+        1281.25,
+        1279.15,
+        1281.25,
+        1279.15,
+        1279.2
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1560.45,
+      "name": "editor.snapshot_reducer.1024",
+      "samples_ns_per_op": [
+        1552.1,
+        1560.45,
+        1558.35,
+        1693.75,
+        1554.15,
+        1929.15,
+        1564.6
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 111743.75,
+      "name": "editor.core_set_stats.102400",
+      "samples_ns_per_op": [
+        111895.85,
+        110802.1,
+        112702.1,
+        111743.75,
+        111183.35,
+        111768.75,
+        111706.25
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 122289.55,
+      "name": "editor.snapshot_reducer.102400",
+      "samples_ns_per_op": [
+        122289.55,
+        121941.65,
+        121731.25,
+        122312.5,
+        122489.6,
+        121531.25,
+        122597.9
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1110385.4,
+      "name": "editor.core_set_stats.1048576",
+      "samples_ns_per_op": [
+        1109472.9,
+        1110385.4,
+        1111100,
+        1110456.25,
+        1105118.75,
+        1095891.65,
+        1110983.35
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1200816.7,
+      "name": "editor.snapshot_reducer.1048576",
+      "samples_ns_per_op": [
+        1206781.25,
+        1199418.75,
+        1199287.5,
+        1200816.7,
+        1197245.8,
+        1202564.6,
+        1205047.9
+      ]
+    },
+    {
+      "iterations": 5,
+      "median_ns": 8782633.4,
+      "name": "editor.core_set_stats.8388608",
+      "samples_ns_per_op": [
+        8747791.6,
+        8761075,
+        8734866.8,
+        8804833.4,
+        8809983.4,
+        8782633.4,
+        8783366.6
+      ]
+    },
+    {
+      "iterations": 5,
+      "median_ns": 9459966.6,
+      "name": "editor.snapshot_reducer.8388608",
+      "samples_ns_per_op": [
+        9479825,
+        9459966.6,
+        9437800,
+        9454258.2,
+        9465891.8,
+        9428716.6,
+        9469758.2
+      ]
+    }
+  ],
+  "samples": 7,
+  "machine": "Apple M1 Max",
+  "swift": "swift-driver version: 1.127.14.1 Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)\nTarget: arm64-apple-macosx28.0",
+  "zig": "0.16.0 ReleaseFast",
+  "context": "Captured after Debug/ReleaseFast smoke and App launch tests finished; benchmark ran without concurrent lab tests."
+}

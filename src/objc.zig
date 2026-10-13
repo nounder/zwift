@@ -154,7 +154,6 @@ pub const Id = struct {
     }
 };
 
-
 // ── NSString helpers ───────────────────────────────────────────────────
 
 pub fn nsString(str: [*:0]const u8) Object {
@@ -490,23 +489,11 @@ fn SendArgTypes(comptime table: anytype, comptime selector: [*:0]const u8) type 
 /// Convert a comptime tuple of types like .{Object, i64} into an actual tuple struct type.
 fn ArgTuple(comptime type_list: anytype) type {
     const info = @typeInfo(@TypeOf(type_list)).@"struct";
-    var fields: [info.fields.len]std.builtin.Type.StructField = undefined;
+    var types: [info.fields.len]type = undefined;
     for (info.fields, 0..) |_, i| {
-        const T = type_list[i]; // This is a `type` value
-        fields[i] = .{
-            .name = std.fmt.comptimePrint("{d}", .{i}),
-            .type = T,
-            .default_value_ptr = null,
-            .is_comptime = false,
-            .alignment = @alignOf(T),
-        };
+        types[i] = type_list[i];
     }
-    return @Type(.{ .@"struct" = .{
-        .layout = .auto,
-        .fields = &fields,
-        .decls = &.{},
-        .is_tuple = true,
-    } });
+    return @Tuple(&types);
 }
 
 /// Coerce args tuple to match expected types. Auto-converts:
@@ -549,17 +536,11 @@ fn AbiType(comptime T: type) type {
 /// Convert a full args tuple's types to ABI types.
 fn AbiArgTypes(comptime Expected: type) type {
     const fields = @typeInfo(Expected).@"struct".fields;
-    var new_fields: [fields.len]std.builtin.Type.StructField = undefined;
+    var types: [fields.len]type = undefined;
     for (fields, 0..) |f, i| {
-        new_fields[i] = f;
-        new_fields[i].type = AbiType(f.type);
+        types[i] = AbiType(f.type);
     }
-    return @Type(.{ .@"struct" = .{
-        .layout = .auto,
-        .fields = &new_fields,
-        .decls = &.{},
-        .is_tuple = true,
-    } });
+    return @Tuple(&types);
 }
 
 fn coerceArgs(comptime Expected: type, args: anytype) Expected {
@@ -696,23 +677,17 @@ fn MsgSendFn(comptime ReturnType: type, comptime ArgsTuple: type) type {
     const args_info = @typeInfo(ArgsTuple).@"struct";
     const base_count = 2; // self + sel
 
-    var params: [base_count + args_info.fields.len]std.builtin.Type.Fn.Param = undefined;
+    var params: [base_count + args_info.fields.len]type = undefined;
 
     // self
-    params[0] = .{ .is_generic = false, .is_noalias = false, .type = *anyopaque };
+    params[0] = *anyopaque;
     // _cmd
-    params[1] = .{ .is_generic = false, .is_noalias = false, .type = Sel };
+    params[1] = Sel;
 
     // extra args
     for (args_info.fields, 0..) |field, i| {
-        params[base_count + i] = .{ .is_generic = false, .is_noalias = false, .type = field.type };
+        params[base_count + i] = field.type;
     }
 
-    return @Type(.{ .@"fn" = .{
-        .calling_convention = cc,
-        .is_generic = false,
-        .is_var_args = false,
-        .return_type = ReturnType,
-        .params = &params,
-    } });
+    return @Fn(&params, &@splat(.{}), ReturnType, .{ .@"callconv" = cc });
 }

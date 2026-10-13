@@ -386,7 +386,7 @@ fn buildUI() void {
     AppKit.NSLayoutConstraint.pinWidthEqual(scroll_view.id, root.id);
 
     refreshTodozList();
-    objc.send(main_window.id, "makeKeyAndOrderFront:", void, .{null});
+    objc.send(main_window.id, "makeKeyAndOrderFront:", void, .{@as(?Object, null)});
     AppKit.NSApplication.static("sharedApplication", .{}).send("activateIgnoringOtherApps:", .{true});
 }
 
@@ -531,7 +531,7 @@ fn buildTodozRow(t: *const Todoz, idx: usize) AppKit.NSStackView {
         label.send("setContentHuggingPriority:forOrientation:", .{ 249, 0 });
         label.send("setContentCompressionResistancePriority:forOrientation:", .{ 749, 0 });
         const cell = objc.send(label.id, "cell", Object, .{});
-        objc.send(cell, "setLineBreakMode:", void, .{4});
+        objc.send(cell, "setLineBreakMode:", void, .{@as(c_ulong, 4)});
         row.send("addArrangedSubview:", .{label.id});
     }
 

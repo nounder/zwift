@@ -1,0 +1,641 @@
+{
+  "notes": "ReleaseFast Zig / swiftc -O. Includes harness and destruction; warmup 5%, minimum 5 iterations. Sequential cases: small ratios need repeated runs. Swift baselines are noinline. Host timings cover synchronous CPU work, not GPU or input latency. Editor variants alternate to force edits.",
+  "os": "Version 27.0.1 (Build 26A434)",
+  "results": [
+    {
+      "iterations": 100000,
+      "median_ns": 1.72333,
+      "name": "harness.consume",
+      "samples_ns_per_op": [
+        1.77542,
+        1.74375,
+        1.72292,
+        1.725,
+        1.72166,
+        1.72292,
+        1.72333
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 3.10792,
+      "name": "abi.quad.zig",
+      "samples_ns_per_op": [
+        3.10625,
+        3.10791,
+        3.13917,
+        3.105,
+        3.10792,
+        3.50083,
+        3.91583
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 2.78291,
+      "name": "abi.quad.swift",
+      "samples_ns_per_op": [
+        2.80167,
+        2.785,
+        2.755,
+        2.75458,
+        2.85125,
+        2.755,
+        2.78291
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 51.59667,
+      "name": "abi.state_uint.zig",
+      "samples_ns_per_op": [
+        56.04084,
+        54.02709,
+        52.56,
+        51.59667,
+        51.1,
+        51.08833,
+        51.06625
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 47.90833,
+      "name": "abi.state_uint.swift",
+      "samples_ns_per_op": [
+        49.81666,
+        47.93,
+        47.91125,
+        47.87666,
+        47.90833,
+        47.855,
+        47.88333
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 48.01375,
+      "name": "abi.state_bool.zig",
+      "samples_ns_per_op": [
+        48.09916,
+        48.03666,
+        41.15,
+        40.64042,
+        41.83375,
+        48.16875,
+        48.01375
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 48.11875,
+      "name": "abi.state_bool.swift",
+      "samples_ns_per_op": [
+        48.31875,
+        48.04209,
+        48.11875,
+        48.08667,
+        48.22916,
+        48.10083,
+        48.11875
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 47.91041,
+      "name": "abi.state_double.zig",
+      "samples_ns_per_op": [
+        47.91041,
+        47.92708,
+        47.92167,
+        47.86833,
+        47.7975,
+        47.87333,
+        48.12458
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 40.47166,
+      "name": "abi.state_double.swift",
+      "samples_ns_per_op": [
+        47.59709,
+        40.41167,
+        40.44416,
+        40.47166,
+        40.35709,
+        46.93583,
+        47.95167
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 68.7275,
+      "name": "abi.state_string.zig",
+      "samples_ns_per_op": [
+        68.53042,
+        68.7275,
+        68.67875,
+        68.80792,
+        68.90209,
+        68.58125,
+        68.80542
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 68.74834,
+      "name": "abi.state_string.swift",
+      "samples_ns_per_op": [
+        68.68666,
+        68.74834,
+        68.78834,
+        68.78708,
+        69.04375,
+        68.59375,
+        68.70209
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 58.66875,
+      "name": "abi.environment_bool.zig",
+      "samples_ns_per_op": [
+        58.70584,
+        58.63125,
+        58.66875,
+        58.72875,
+        59.35166,
+        56.82625,
+        55.4525
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 12.82208,
+      "name": "abi.environment_bool.swift",
+      "samples_ns_per_op": [
+        12.90875,
+        12.81958,
+        12.8175,
+        12.88584,
+        12.85416,
+        12.82208,
+        12.81833
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 56.14209,
+      "name": "abi.environment_double.zig",
+      "samples_ns_per_op": [
+        55.7675,
+        56.14209,
+        56.24583,
+        56.07375,
+        56.16292,
+        56.04708,
+        56.15708
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 12.82166,
+      "name": "abi.environment_double.swift",
+      "samples_ns_per_op": [
+        12.82166,
+        12.87875,
+        12.81792,
+        12.82458,
+        12.8175,
+        12.9475,
+        12.81667
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 307.94541,
+      "name": "abi.constant_bool.zig",
+      "samples_ns_per_op": [
+        319.65542,
+        308.04208,
+        307.94541,
+        310.59833,
+        307.15333,
+        306.77417,
+        306.95375
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 307.665,
+      "name": "abi.constant_bool.swift",
+      "samples_ns_per_op": [
+        307.37292,
+        307.24667,
+        307.84708,
+        307.60209,
+        307.79292,
+        307.665,
+        308.18917
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 28.5375,
+      "name": "abi.text_string.zig",
+      "samples_ns_per_op": [
+        28.58209,
+        28.53458,
+        28.5375,
+        28.54042,
+        28.76292,
+        28.52334,
+        28.455
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 27.61959,
+      "name": "abi.text_string.swift",
+      "samples_ns_per_op": [
+        27.56958,
+        27.61583,
+        27.64667,
+        27.63333,
+        27.48875,
+        27.61959,
+        27.62584
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 889.54542,
+      "name": "view.body.generated",
+      "samples_ns_per_op": [
+        897.08667,
+        889.28708,
+        890.10833,
+        888.445,
+        889.74708,
+        889.0025,
+        889.54542
+      ]
+    },
+    {
+      "iterations": 100000,
+      "median_ns": 898.8175,
+      "name": "view.body.handwritten",
+      "samples_ns_per_op": [
+        899.595,
+        896.93666,
+        899.04834,
+        899.16416,
+        898.5,
+        898.42416,
+        898.8175
+      ]
+    },
+    {
+      "iterations": 500,
+      "median_ns": 289429.166,
+      "name": "view.host_update.generated",
+      "samples_ns_per_op": [
+        291352.582,
+        289752.084,
+        289554.666,
+        288632.582,
+        289429.166,
+        288506.25,
+        287669.832
+      ]
+    },
+    {
+      "iterations": 500,
+      "median_ns": 290493,
+      "name": "view.host_update.handwritten",
+      "samples_ns_per_op": [
+        291360,
+        290075.916,
+        290587.918,
+        290493,
+        290724.666,
+        290385.834,
+        289291.25
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 19.083,
+      "name": "todo.toggle_core.100",
+      "samples_ns_per_op": [
+        19.625,
+        19.5,
+        19.083,
+        18.875,
+        19.042,
+        19.083,
+        18.875
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 36934.16,
+      "name": "todo.toggle_snapshot_legacy.100",
+      "samples_ns_per_op": [
+        37086.66,
+        36932.5,
+        36959.18,
+        36910,
+        36938.34,
+        36882.5,
+        36934.16
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 29780,
+      "name": "todo.toggle_snapshot_indexed.100",
+      "samples_ns_per_op": [
+        29862.5,
+        29722.5,
+        29780,
+        29765.82,
+        29971.68,
+        29696.66,
+        29835
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 174.375,
+      "name": "todo.toggle_core.1000",
+      "samples_ns_per_op": [
+        169.167,
+        174.416,
+        174.375,
+        178.833,
+        169.167,
+        174.375,
+        174.5
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 804626.68,
+      "name": "todo.toggle_snapshot_legacy.1000",
+      "samples_ns_per_op": [
+        803609.16,
+        805197.5,
+        803963.32,
+        804626.68,
+        804838.34,
+        807330.84,
+        803194.16
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 289460.82,
+      "name": "todo.toggle_snapshot_indexed.1000",
+      "samples_ns_per_op": [
+        291954.16,
+        294327.5,
+        288756.66,
+        289460.82,
+        288985.84,
+        289365,
+        290589.18
+      ]
+    },
+    {
+      "iterations": 1000,
+      "median_ns": 799.167,
+      "name": "todo.toggle_core.5000",
+      "samples_ns_per_op": [
+        799.5,
+        798.541,
+        799.209,
+        790.583,
+        796.792,
+        800.334,
+        799.167
+      ]
+    },
+    {
+      "iterations": 10,
+      "median_ns": 13843337.5,
+      "name": "todo.toggle_snapshot_legacy.5000",
+      "samples_ns_per_op": [
+        13864995.8,
+        13846037.5,
+        13843337.5,
+        13824087.5,
+        13822295.8,
+        13831445.8,
+        13859083.4
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 1456347.5,
+      "name": "todo.toggle_snapshot_indexed.5000",
+      "samples_ns_per_op": [
+        1451540.82,
+        1453706.66,
+        1455353.34,
+        1457152.5,
+        1456635,
+        1456633.32,
+        1456347.5
+      ]
+    },
+    {
+      "iterations": 50,
+      "median_ns": 291720.84,
+      "name": "todo.callback_model.1000",
+      "samples_ns_per_op": [
+        292580.82,
+        291365,
+        291632.5,
+        291845,
+        292025,
+        291645.84,
+        291720.84
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1277.1,
+      "name": "editor.core_set_stats.1024",
+      "samples_ns_per_op": [
+        1277.1,
+        1679.15,
+        1281.25,
+        1287.5,
+        1275,
+        1268.75,
+        1275
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1512.5,
+      "name": "editor.snapshot_legacy.1024",
+      "samples_ns_per_op": [
+        1547.9,
+        1512.5,
+        1508.3,
+        1512.5,
+        1506.25,
+        1514.55,
+        1508.35
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1141.65,
+      "name": "editor.snapshot_reducer.1024",
+      "samples_ns_per_op": [
+        1145.85,
+        1139.6,
+        1141.65,
+        1143.75,
+        1143.75,
+        1139.6,
+        1141.65
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 110814.55,
+      "name": "editor.core_set_stats.102400",
+      "samples_ns_per_op": [
+        111181.25,
+        112210.4,
+        110758.35,
+        110814.55,
+        110402.1,
+        110685.4,
+        111739.55
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 115035.4,
+      "name": "editor.snapshot_legacy.102400",
+      "samples_ns_per_op": [
+        113225,
+        115560.45,
+        114500,
+        113822.9,
+        116714.6,
+        115775,
+        115035.4
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 105647.9,
+      "name": "editor.snapshot_reducer.102400",
+      "samples_ns_per_op": [
+        105647.9,
+        105706.25,
+        107341.7,
+        104414.6,
+        104200,
+        105277.05,
+        106837.5
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1100600,
+      "name": "editor.core_set_stats.1048576",
+      "samples_ns_per_op": [
+        1102827.1,
+        1100600,
+        1108710.45,
+        1100308.35,
+        1094987.5,
+        1102152.1,
+        1094902.05
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1164054.15,
+      "name": "editor.snapshot_legacy.1048576",
+      "samples_ns_per_op": [
+        1163093.75,
+        1163491.7,
+        1168166.7,
+        1164839.6,
+        1164054.15,
+        1167495.8,
+        1162091.7
+      ]
+    },
+    {
+      "iterations": 20,
+      "median_ns": 1083397.9,
+      "name": "editor.snapshot_reducer.1048576",
+      "samples_ns_per_op": [
+        1083585.45,
+        1092566.7,
+        1084054.15,
+        1079952.1,
+        1083397.9,
+        1082412.5,
+        1080900
+      ]
+    },
+    {
+      "iterations": 5,
+      "median_ns": 8567575,
+      "name": "editor.core_set_stats.8388608",
+      "samples_ns_per_op": [
+        8546291.6,
+        8567575,
+        8533933.2,
+        8571033.2,
+        8568891.6,
+        8547025,
+        8599575
+      ]
+    },
+    {
+      "iterations": 5,
+      "median_ns": 9234100,
+      "name": "editor.snapshot_legacy.8388608",
+      "samples_ns_per_op": [
+        9249950,
+        9234100,
+        9239733.2,
+        9254600,
+        9218175,
+        9228366.6,
+        9197891.6
+      ]
+    },
+    {
+      "iterations": 5,
+      "median_ns": 8711266.6,
+      "name": "editor.snapshot_reducer.8388608",
+      "samples_ns_per_op": [
+        8607383.2,
+        8594458.4,
+        8599608.2,
+        8711266.6,
+        8755741.6,
+        8747808.2,
+        8740025
+      ]
+    }
+  ],
+  "samples": 7,
+  "machine": "Apple M1 Max",
+  "swift": "swift-driver version: 1.127.14.1 Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)\nTarget: arm64-apple-macosx28.0",
+  "zig": "0.16.0 ReleaseFast",
+  "context": "Copy-reduction iteration. Previous copying reducer and current borrowed-input/reused-snapshot reducer measured in the same process; no concurrent lab tests."
+}

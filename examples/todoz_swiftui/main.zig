@@ -24,19 +24,13 @@ extern "c" fn class_addMethod(Class, SEL, *const anyopaque, [*:0]const u8) bool;
 
 fn MsgSendFn(comptime ReturnType: type, comptime ArgsTuple: type) type {
     const fields = @typeInfo(ArgsTuple).@"struct".fields;
-    var params: [2 + fields.len]std.builtin.Type.Fn.Param = undefined;
-    params[0] = .{ .type = id, .is_generic = false, .is_noalias = false };
-    params[1] = .{ .type = SEL, .is_generic = false, .is_noalias = false };
+    var params: [2 + fields.len]type = undefined;
+    params[0] = id;
+    params[1] = SEL;
     for (fields, 0..) |f, i| {
-        params[2 + i] = .{ .type = f.type, .is_generic = false, .is_noalias = false };
+        params[2 + i] = f.type;
     }
-    return @Type(.{ .@"fn" = .{
-        .calling_convention = .c,
-        .return_type = ReturnType,
-        .params = &params,
-        .is_var_args = false,
-        .is_generic = false,
-    } });
+    return @Fn(&params, &@splat(.{}), ReturnType, .{ .@"callconv" = .c });
 }
 
 fn msg(target: anytype, comptime sel_name: [*:0]const u8, args: anytype) id {
